@@ -1,25 +1,51 @@
 {% extends "layout.html" %}
 {% block content %}
-  {% for post in posts %}
-    <article class="content-section py-3 px-4 mb-4">
-      <div class="d-flex align-items-start gap-4">
-        <img class="rounded-circle article-img flex-shrink-0"
-             src="{{post.author.image_path}}"
-             alt="{{ post.author.username }}'s profile picture"
-             width="64"
-             height="64"
-             loading="lazy">
-        <div class="flex-grow-1">
-          <div class="article-metadata mb-2">
-            <a class="me-2" href="{{url_for('user_posts',user_id=post.author.id)}}">{{ post.author.username }}</a>
-            <small class="text-body-secondary">{{ post.date_posted }}</small>
-          </div>
-          <h2>
-            <a class="article-title" href="{{url_for('post_html',id=post.id)}}">{{ post.title }}</a>
-          </h2>
-          <p class="article-content">{{ post.content }}</p>
+  <div class="mb-5">
+    <h1 class="fw-bold mb-3" style="letter-spacing: -0.03em;">Blog</h1>
+    <p class="text-secondary opacity-75">Pensamentos, notas e artigos sobre tecnologia e design.</p>
+  </div>
+
+  <div class="post-list">
+    {% for post in posts %}
+      <article class="post-card-container">
+        <div class="d-flex align-items-start gap-4">
+            <!-- Foto do Autor -->
+            <img class="rounded-circle article-img flex-shrink-0"
+                 src="{{post.author.image_path}}"
+                 alt="{{ post.author.username }}'s profile picture"
+                 width="64"
+                 height="64"
+                 loading="lazy">
+            
+            <div class="flex-grow-1">
+              <!-- Metadados -->
+              <div class="article-metadata mb-2">
+                <a class="me-2 fw-bold text-decoration-none color-inherit" href="{{url_for('user_posts',user_id=post.author.id)}}">
+                    @{{ post.author.username }}
+                </a>
+                <small class="text-body-secondary opacity-75">{{ post.date_posted }}</small>
+              </div>
+
+              <!-- Título do Post -->
+              <h2 class="h4 mb-2">
+                <a class="post-entry-title" href="{{url_for('post_html',id=post.id)}}">
+                    {{ post.title }}
+                </a>
+              </h2>
+
+              <!-- Conteúdo do Post -->
+              <p class="article-content opacity-75 mt-3">
+                {{ post.content }}
+              </p>
+              
+              <div class="mt-4 pt-3 border-top border-opacity-10">
+                <a href="{{url_for('post_html',id=post.id)}}" class="text-decoration-none small fw-bold text-uppercase opacity-50 hover-opacity-100" style="letter-spacing: 0.05em;">
+                  Read more <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
         </div>
-      </div>
-    </article>
-  {% endfor %}
+      </article>
+    {% endfor %}
+  </div>
 {% endblock content %}
