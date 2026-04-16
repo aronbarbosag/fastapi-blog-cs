@@ -1,7 +1,13 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.staticfiles import StaticFiles
 # from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from schemas import PostCreate, PostResponse
+
 
 app = FastAPI()
 
@@ -25,17 +31,104 @@ posts: list[dict] = [
         "content": "Python is a great language for web development, and FastAPI makes it even better.",
         "date_posted": "April 21, 2025",
     },
+    {
+        "id": 3,
+        "author": "John Doe",
+        "title": "Python is Broken",
+        "content": "Python is Broken.",
+        "date_posted": "April 14, 2026",
+    },
 ]
 
 @app.get("/", include_in_schema=False, name='home')
 @app.get("/posts",  include_in_schema=False, name='posts')
 def home(request:Request):
+
     return templates.TemplateResponse(request,"home.html",{"posts":posts,"title": "Home"})
 
 
+@app.get("/posts/{id}",  include_in_schema=False, name='post_html')
+def get_post_html(request:Request,id:int):
 
-@app.get("/api/posts")
+    for post in posts:
+        if post.get("id")==id:
+            title = post['title'][:50]
+            return templates.TemplateResponse(request,"post.html",{"post":post,"title": title})
+
+    return templates.TemplateResponse(request,"404.html",status_code=404)
+
+
+@app.get("/api/posts",response_model=list[PostResponse])
 def get_posts():
     return posts
 
+@app.get("/api/posts/{id}",response_model=PostResponse)
+def get_post_by_id(id:int):
 
+    for post in posts:
+        if post.get("id")==id:
+            return post
+
+
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Post not found")
+
+
+@app.post("/api/posts",status_code=status.HTTP_201_CREATED)
+def create_post(post:PostCreate):
+    id_max = len(posts) + 1
+    new_post=post.model_dump()
+    new_post['id'] = id_max
+    new_post['date_posted'] = "April 15, 2026"
+    posts.append(new_post)
+
+    return JSONResponse(content={"detail":"Success"},status_code=status.HTTP_201_CREATED)
+
+
+
+
+
+## StarletteHTTPException Handler
+@app.exception_handler(StarletteHTTPException)
+def general_http_exception_handler(request: Request, exception: StarletteHTTPException):
+    message = (
+        exception.detail
+        if exception.detail
+        else "An error occurred. Please check your request and try again."
+    )
+
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=exception.status_code,
+            content={"detail": message},
+        )
+    return templates.TemplateResponse(
+        request,
+        "404.html",
+        {
+            "status_code": exception.status_code,
+            "title": exception.status_code,
+            "message": message,
+        },
+        status_code=exception.status_code,
+    )
+
+
+### RequestValidationError Handler
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request: Request, exception: RequestValidationError):
+    if request.url.path.startswith("/api"):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            content={"detail": exception.errors()},
+        )
+    return templates.TemplateResponse(
+        request,
+        "404.html",
+        {
+            "status_code": status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "title": status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "message": "Invalid request. Please check your input and try again.",
+        },
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+    )
