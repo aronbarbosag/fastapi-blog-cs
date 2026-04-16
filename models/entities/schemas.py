@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
+from .base import Base
 
 
 class User(Base):
@@ -28,6 +28,9 @@ class User(Base):
             return f"/media/profile_pics/{self.image_file}"
         return "/static/profile_pics/default.jpg"
 
+    def __repr__(self) -> str:
+        return f"User({self.id},{self.username})"
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -45,4 +48,7 @@ class Post(Base):
         default=lambda: datetime.now(UTC),
     )
 
-    author: Mapped[User] = relationship(back_populates="posts")
+    author: Mapped[User] = relationship(back_populates="posts", lazy="joined")
+
+    def __repr__(self) -> str:
+        return f"Post(id={self.id},title={self.title[:20]}...,content={self.content[:20]}...,date_posted={self.date_posted.strftime('%B %d %Y')},author_id={self.user_id})"
