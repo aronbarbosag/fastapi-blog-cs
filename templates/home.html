@@ -16,14 +16,14 @@
                  width="64"
                  height="64"
                  loading="lazy">
-            
+
             <div class="flex-grow-1">
               <!-- Metadados -->
               <div class="article-metadata mb-2">
                 <a class="me-2 fw-bold text-decoration-none color-inherit" href="{{url_for('user_posts',user_id=post.author.id)}}">
                     @{{ post.author.username }}
                 </a>
-                <small class="text-body-secondary opacity-75">{{ post.date_posted }}</small>
+                <small class="text-body-secondary opacity-75">{{ post.date_posted.strftime(" %B %d %Y %H:%M:%S") }}</small>
               </div>
 
               <!-- Título do Post -->
@@ -37,7 +37,7 @@
               <p class="article-content opacity-75 mt-3">
                 {{ post.content }}
               </p>
-              
+
               <div class="mt-4 pt-3 border-top border-opacity-10">
                 <a href="{{url_for('post_html',id=post.id)}}" class="text-decoration-none small fw-bold text-uppercase opacity-50 hover-opacity-100" style="letter-spacing: 0.05em;">
                   Read more <i class="bi bi-arrow-right ms-1"></i>

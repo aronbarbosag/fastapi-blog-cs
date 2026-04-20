@@ -14,7 +14,7 @@
         <!-- Metadados -->
         <div class="article-metadata mb-2">
           <a class="me-2 fw-bold text-decoration-none color-inherit" href="{{url_for('user_posts',user_id=post.author.id)}}">@{{ post.author.username }}</a>
-          <small class="text-body-secondary">{{ post.date_posted }}</small>
+          <small class="text-body-secondary">{{ post.date_posted.strftime(" %B %d %Y %H:%M:%S") }}</small>
         </div>
 
         <!-- Título e Conteúdo -->

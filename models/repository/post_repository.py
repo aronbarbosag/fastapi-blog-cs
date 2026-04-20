@@ -4,6 +4,7 @@ from sqlalchemy import select
 
 from models.connection.interface.db_connection_handler import IDBConnectionHandler
 from models.entities.schemas import Post, User
+from models.validators.schemas import PostUpdate
 
 
 class PostRepository:
@@ -66,5 +67,20 @@ class PostRepository:
         post = self.__search_existing_post(post_id)
 
         with self.db_connection as db:
-            db.delete(post)
+            post_ = db.merge(post)
+            db.delete(post_)
             db.commit()
+
+    def update_post(self, post_id: int, post_data_to_update: PostUpdate):
+
+        data = post_data_to_update.model_dump(exclude_unset=True)
+        post = self.__search_existing_post(post_id)
+
+        with self.db_connection as db:
+            post_ = db.merge(post)
+
+            for key, value in data.items():
+                setattr(post_, key, value)
+            db.commit()
+            db.refresh(post_)
+        return post_

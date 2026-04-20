@@ -1,21 +1,25 @@
-from typing import Annotated
-
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 
 # from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from database import Base, engine, get_db
+from database import Base, engine
 from models.connection.db_connection_handler import DBConnectionHandler
 from models.entities.schemas import Post, User
 from models.repository.post_repository import PostRepository
 from models.repository.user_repository import UserRepository
-from models.validators.schemas import PostCreate, PostResponse, UserCreate, UserResponse
+from models.validators.schemas import (
+    PostCreate,
+    PostResponse,
+    PostUpdate,
+    UserCreate,
+    UserResponse,
+    UserUpdate,
+)
 
 Base.metadata.create_all(bind=engine)
 
@@ -115,6 +119,17 @@ def get_user_posts(user_id: int):
     return posts
 
 
+@app.put("/api/users/{id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
+def update_user(user_id: int, data: UserUpdate):
+
+    connection = DBConnectionHandler()
+    repo = UserRepository(connection)
+
+    post = repo.update_user(user_id=user_id, user_image_file=data)
+
+    return post
+
+
 @app.get("/api/posts", response_model=list[PostResponse])
 def get_posts():
 
@@ -127,7 +142,7 @@ def get_posts():
 
 
 @app.get("/api/posts/{id}", response_model=PostResponse)
-def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
+def get_post(post_id: int):
 
     connection = DBConnectionHandler()
     repo = PostRepository(connection)
@@ -137,6 +152,17 @@ def get_post(post_id: int, db: Annotated[Session, Depends(get_db)]):
     if post:
         return post
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
+
+@app.put("/api/posts/{id}", response_model=PostResponse, status_code=status.HTTP_200_OK)
+def update_post(post_id: int, data: PostUpdate):
+
+    connection = DBConnectionHandler()
+    repo = PostRepository(connection)
+
+    post = repo.update_post(post_id=post_id, post_data_to_update=data)
+
+    return post
 
 
 @app.post("/api/posts", status_code=status.HTTP_201_CREATED)

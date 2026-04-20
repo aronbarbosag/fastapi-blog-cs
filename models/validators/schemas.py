@@ -20,6 +20,10 @@ class UserResponse(UserBase):
     image_path: str
 
 
+class UserUpdate(BaseModel):
+    image_file: str | None = None
+
+
 class PostBase(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     content: str = Field(min_length=1)
@@ -36,3 +40,12 @@ class PostResponse(PostBase):
     user_id: int
     date_posted: datetime
     author: UserResponse
+
+
+class PostUpdate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    title: str | None = None
+    content: str | None = None
+    user_id: int | None = None
+    date_posted: datetime | None = None
