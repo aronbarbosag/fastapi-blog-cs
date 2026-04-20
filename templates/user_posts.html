@@ -19,14 +19,14 @@
             <div class="post-entry-meta mb-0">
               <span class="fw-semibold">@{{ post.author.username }}</span>
               <span class="mx-2 opacity-25">•</span>
-              <time class="opacity-75 small">{{ post.date_posted.strftime("%B %d, %Y") }}</time>
+              <time class="opacity-75 small">{{ post.date_posted.strftime(" %B %d %Y %H:%M:%S") }}</time>
             </div>
         </div>
-        
+
         <a class="post-entry-title h4" href="{{ url_for('post_html', id=post.id) }}">
           {{ post.title }}
         </a>
-        
+
         <p class="post-entry-content opacity-75 mt-3">
           {{ post.content | truncate(160) }}
         </p>
