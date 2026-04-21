@@ -89,3 +89,15 @@ class UserRepository:
             db.refresh(user)
 
         return user
+
+    def delete_user(self, user_id: int):
+
+        user = self.select_user(user_id)
+
+        if not user:
+            return None
+
+        with self.db_connection as db:
+            user_ = db.merge(user)
+            db.delete(user_)
+            db.commit()
