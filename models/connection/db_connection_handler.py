@@ -15,6 +15,9 @@ class DBConnectionHandler(IDBConnectionHandler):
         )
         self._session: Session | None = None
 
+    def get_engine(self):
+        return self.engine
+
     def __enter__(self):
         self._session = self._session_factory()
         return self._session
